@@ -1,5 +1,5 @@
 /* User Variables */
-var mazeSize = 800; // Dimensions of canvas in pixels.
+var mazeSize = window.innerWidth; // Dimensions of canvas in pixels.
 var mazeSpaces = 100; // Number of spaces in the x and y directions.
 var startPosition = {x: 0, y: 0};
 var finishPosition = {x: mazeSpaces - 1, y: mazeSpaces - 1};
@@ -22,12 +22,7 @@ function initCanvas() {
 	ctx = canvas.getContext("2d");
 	
 	canvas.width = spaceSize * mazeSpaces;
-	canvas.height = spaceSize * mazeSpaces; // + ctx.lineWidth;
-	
-	//ctx.translate(1, 1); // ~~(ctx.lineWidth / 2).
-	
-	canvas.style.width = Math.min(window.innerWidth, window.innerHeight)-4 + "px";
-	canvas.style.height = canvas.style.width;
+	canvas.height = spaceSize * mazeSpaces;
 	
 	letterWidth = ctx.measureText("S").width;
 	letterHeight = spaceSize - (2 / 15 * 2 * spaceSize);

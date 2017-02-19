@@ -11,11 +11,11 @@
 			margin: 0px;
 			padding: 0px;
 			background: black;
-			overflow: auto;
+			overflow: hidden;
 		}
 		iframe {
 			border: 0px;
-			display: inline-block;
+			display: inline;
 			float: left;
 		}
 	</style>
@@ -35,10 +35,11 @@
 		window.addEventListener("resize", resize = function() {
 			iframe1.width = Math.min(window.innerWidth, window.innerHeight);
 			iframe1.height = iframe1.width;
-			iframe2.width = Math.max(window.innerWidth, window.innerHeight) - iframe1.width;
+			iframe2.width = Math.min(Math.max(window.innerWidth, window.innerHeight) - iframe1.width, window.innerWidth, window.innerHeight);
 			iframe2.height = iframe2.width;
 		});
 		resize();
+		setTimeout(resize, 1000);
 	</script>
 	
 </body>
