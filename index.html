@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+	<title>Maze Generation</title>
+	
+	<style>
+		body {
+			margin: 0px;
+			padding: 0px;
+			background: black;
+			overflow: hidden;
+		}
+		#iframe {
+			border: 0px;
+			display: inline-block;
+		}
+	</style>
+
+</head>
+
+<body>
+	
+	<iframe id="iframe1" src="./mazeGenerator.html"></iframe>
+	<iframe id="iframe2" src="./mazeGeneratorDemo.html"></iframe>
+	
+	<script>
+		var iframe1 = document.getElementById("iframe1");
+		var resize;
+		
+		window.addEventListener("resize", resize = function() {
+			iframe1.width = Math.min(window.innerWidth, window.innerHeight);
+			iframe1.height = iframe1.width;
+		});
+		resize();
+	</script>
+	
+</body>
+
+</html>

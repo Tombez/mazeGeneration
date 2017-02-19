@@ -1,5 +1,5 @@
 /* User Variables */
-var mazeSize = 1000; // Dimensions of canvas in pixels.
+var mazeSize = 800; // Dimensions of canvas in pixels.
 var mazeSpaces = 100; // Number of spaces in the x and y directions.
 var startPosition = {x: 0, y: 0};
 var finishPosition = {x: mazeSpaces - 1, y: mazeSpaces - 1};
@@ -104,6 +104,13 @@ function draw() {
 	ctx.font = spaceSize + "px Arial";
 	ctx.fillText("S", (((startPosition.x + 1) * spaceSize) - letterWidth)/2, ((startPosition.y + 1) * spaceSize) - (spaceSize - letterHeight)/2);
 	ctx.fillText("F", (((finishPosition.x + 1) * spaceSize) - letterWidth)/2, ((finishPosition + 1) * spaceSize) - (spaceSize - letterHeight)/2);
+}
+function downloadMaze() {
+	var link = document.createElement('a');
+	link.href = canvas.toDataURL();
+	link.download = mazeSpaces + 'WideMaze@' + canvas.width + 'p.png';
+	//document.body.appendChild(link);
+	link.click();
 }
 
 // Main:
