@@ -1,100 +1,100 @@
-var mazeSize = 600; // Dimensions of canvas in pixels.
-var mazeSpaces = 12; // Number of spaces in the x and y directions.
+/* User Variables */
+var mazeSize = window.innerWidth; // Dimensions of canvas in pixels.
+var mazeSpaces = 15; // Number of spaces in the x and y directions.
+/* End User Variables */
 
-var startPosition = {x: 0, y: 0};
-var spaceSize = mazeSize / mazeSpaces;
-var canvas = document.getElementById("canvas");
-var ctx = canvas.getContext("2d");
-canvas.width = mazeSize;
-canvas.height = mazeSize;
-var spaces = [];
+var spaceSize = ~~(mazeSize / mazeSpaces);
+var canvas;
+var ctx;
+var spaces;
+
 var stack = [];
-var current = {x: startPosition.x, y: startPosition.y};
+var neighbors;
 var next;
-var neighbors = [];
+var x;
+var y;
+var n;
+var current = {x: 0, y: 0};
+
 // Basically rainbow tables:
-var directions = [{x: 1, y: 0, t: "r", f: "l"}, {x: 0, y: -1, t: "u", f: "d"}, {x: -1, y: 0, t: "l", f: "r"}, {x: 0, y: 1, t: "d", f: "u"}];
-//var dirs = ["r", "u", "l", "d"];
-var corners = {r: [[1, 0], [1, 1]], u: [[0, 0], [1, 0]], l: [[0, 0], [0, 1]], d: [[0, 1], [1, 1]]};
+var directions = [{x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}, {x: 0, y: 1}]; // right, up, left, down.
+var corners = [[{x: 1, y: 0}, {x: 1, y: 1}], [{x: 0, y: 0}, {x: 1, y: 0}], [{x: 0, y: 1}, {x: 0, y: 0}], [{x: 1, y: 1}, {x: 0, y: 1}]]; // [[NE, SE], [NW, NE], [SW, NW], [SE, SW]].
 
-ctx.strokeStyle = "white"/*FFFFFF*/;
-ctx.lineWidth = 2;
-
+function initCanvas() {
+	canvas = document.getElementById("canvas");
+	ctx = canvas.getContext("2d");
+	
+	canvas.width = spaceSize * mazeSpaces;
+	canvas.height = spaceSize * mazeSpaces;
+}
+function initSpaces() {
+	spaces = new Array(mazeSpaces);
+	for (var n = 0; n < mazeSpaces; n++) {
+		spaces[n] = new Array(mazeSpaces);
+		for (var i = 0; i < mazeSpaces; i++) {
+			spaces[n][i] = [true, true, true, true, false]; // Right, up, left, down (walls), visited.
+		}	
+	}
+}
 function renderMaze() {
 	ctx.clearRect(0, 0, mazeSize, mazeSize);
-	for (var i = 0; i < mazeSpaces; i++) {
-		for (var n = 0; n < mazeSpaces; n++) {
-			ctx.beginPath();
-			ctx.fillStyle = spaces[n][i].v ? "indigo"/*#4B0082*/ : "grey"/*#808080*/;
-			ctx.rect(n * spaceSize, i * spaceSize, spaceSize, spaceSize);
-			ctx.fill();
-			ctx.beginPath();
-			for (var j = 0; j < directions.length; j++) {
-				if (spaces[n][i][directions[j].t]) {
-					ctx.moveTo((n + corners[directions[j].t][0][0]) * spaceSize, (i + corners[directions[j].t][0][1]) * spaceSize);
-					ctx.lineTo((n + corners[directions[j].t][1][0]) * spaceSize, (i + corners[directions[j].t][1][1]) * spaceSize);
+	ctx.lineWidth = 2;
+	spaces[current.x][current.y][4] = true; // a little hack.
+	for (var y = 0; y < mazeSpaces; y++) {
+		for (var x = 0; x < mazeSpaces; x++) {
+			ctx.fillStyle = spaces[x][y][4] ? "indigo"/*#4B0082*/ : "grey"/*#808080*/;
+			ctx.fillRect(x * spaceSize, y * spaceSize, spaceSize, spaceSize);
+			
+			ctx.beginPath(); // draw walls.
+			ctx.strokeStyle = "white";
+			for (var n = 0; n < directions.length; n++) {
+				if (spaces[x][y][n]) {
+					ctx.moveTo((x + corners[n][0].x) * spaceSize, (y + corners[n][0].y) * spaceSize);
+					ctx.lineTo((x + corners[n][1].x) * spaceSize, (y + corners[n][1].y) * spaceSize);
 				}
 			}
 			ctx.stroke();
 		}
 	}
-	ctx.beginPath();
 	ctx.fillStyle = "red";
-	ctx.rect((current.x + 0.25) * spaceSize, (current.y + 0.25) * spaceSize, spaceSize/2, spaceSize/2);
-	ctx.fill();
-	ctx.beginPath();
+	ctx.fillRect((current.x + 0.25) * spaceSize, (current.y + 0.25) * spaceSize, spaceSize/2, spaceSize/2);
+
+	ctx.beginPath(); // draw path:
 	ctx.strokeStyle = "red";
 	for (var n = 0; n + 1 < stack.length; n++) {
 		ctx.moveTo((stack[n].x * spaceSize) + (spaceSize/2), (stack[n].y * spaceSize) + (spaceSize/2));
 		ctx.lineTo((stack[n + 1].x * spaceSize) + (spaceSize/2), (stack[n + 1].y * spaceSize) + (spaceSize/2));
 	}
+	ctx.moveTo((stack[stack.length - 1].x * spaceSize) + (spaceSize/2), (stack[stack.length - 1].y * spaceSize) + (spaceSize/2)); // a little hack.
+	ctx.lineTo((current.x * spaceSize) + (spaceSize/2), (current.y * spaceSize) + (spaceSize/2)); // a little hack.
 	ctx.stroke();
-	ctx.strokeStyle = "white";
 }
-
-function stepSearch() { // Depth-first /*recursive*/ backtracker search algorithm from: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_backtracker.
-	if (!spaces[current.x][current.y].v) {
-		spaces[current.x][current.y].v = true;
-		stack[stack.length] = {x: current.x, y: current.y};
-		return;
-	}
-	for (var n = 0; n < directions.length; n++) {
-		checkNeighbor(current.x + directions[n].x, current.y + directions[n].y, directions[n].t, directions[n].f);
-	}
-	if (neighbors.length == 0) {
-		stack.splice(stack.length - 1, 1);
-		current = stack[stack.length - 1];
-		if (current == null) {
-			current = {x: startPosition.x, y: startPosition.y};
-			return true;
-		}
-		//stepSearch(); // I don't want it to recurse.
-		return;
-	}
-	next = neighbors.splice(~~(Math.random()*neighbors.length), 1)[0];
-	spaces[current.x][current.y][next.t] = false;
-	spaces[next.x][next.y][next.f] = false;
-	current = {x: next.x, y: next.y};
-	stack[stack.length] = {x: current.x, y: current.y};
-	spaces[current.x][current.y].v = true;
+function stepSearch() { // Depth-first backtracker search algorithm from: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_backtracker.
+	spaces[current.x][current.y][4] = true;
 	neighbors = [];
-}
-
-function checkNeighbor(x, y, to, from) {
-	if (spaces[x] && spaces[x][y] && !spaces[x][y].v) {
-		neighbors[neighbors.length] = {x: x, y: y, t: to, f: from};
+	for (n = 0; n < 4; n++) {
+		x = current.x + directions[n].x;
+		y = current.y + directions[n].y;
+		if (spaces[x] && spaces[x][y] && !spaces[x][y][4]) {
+			neighbors.push(n);
+		}
+	}
+	if (neighbors.length) {
+		next = neighbors[~~(Math.random() * neighbors.length)];
+		spaces[current.x][current.y][next] = false;
+		stack.push({x: current.x, y: current.y});
+		current.x += directions[next].x;
+		current.y += directions[next].y;
+		spaces[current.x][current.y][(next + 2) % 4] = false;
+	} else if (stack.length) {
+		current = stack.pop();
+	} else {
+		return true; // we finished!
 	}
 }
 
-function initSpaces() {
-	for (var n = 0; n < mazeSpaces; n++) {
-		spaces[n] = [];
-		for (var i = 0; i < mazeSpaces; i++) {
-			spaces[n][i] = {r: true, u: true, l: true, d: true, v: false}; // Right, up, left, down (walls), visited.
-		}	
-	}
-}
-
+// main:
+initCanvas();
 initSpaces();
 function main() {
 	if (!stepSearch()) {
