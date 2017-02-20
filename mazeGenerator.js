@@ -48,11 +48,6 @@ function generate() { // Depth-first backtracker search algorithm from: https://
 	var current = {x: startPosition.x, y: startPosition.y};
 	
 	while(true) {
-		/*if (current.x == finishPosition.x && current.y == finishPosition.y) {
-			for(var n = 0; n < stack.length; n++) { // Set solution.
-				solutionPath[n] = {x: stack[n].x, y: stack[n].y};
-			}
-		}*/
 		spaces[current.x][current.y][4] = true;
 		neighbors = [];
 		for (n = 0; n < 4; n++) {
@@ -65,12 +60,14 @@ function generate() { // Depth-first backtracker search algorithm from: https://
 		if (neighbors.length) {
 			next = neighbors[~~(Math.random() * neighbors.length)];
 			spaces[current.x][current.y][next] = false;
-			stack.push({x: current.x, y: current.y});
+			stack.push(next);
 			current.x += directions[next].x;
 			current.y += directions[next].y;
 			spaces[current.x][current.y][(next + 2) % 4] = false;
-		} else if (stack.length) {
-			current = stack.pop();
+		} else if (stack.length) { // backtrack:
+			current.x -= directions[stack[stack.length - 1]].x;
+			current.y -= directions[stack[stack.length - 1]].y;
+			stack.pop();
 		} else {
 			break; // we finished!
 		}
@@ -113,3 +110,4 @@ initCanvas();
 initSpaces();
 generate();
 draw();
+spaces = null; // release memory.
