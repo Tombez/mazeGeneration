@@ -1,5 +1,5 @@
 /* User Variables */
-var mazeSize = window.innerWidth; // Dimensions of canvas in pixels.
+var mazeSize = Math.min(window.innerWidth, window.innerHeight); // Dimensions of canvas in pixels.
 var mazeSpaces = 15; // Number of spaces in the x and y directions.
 /* End User Variables */
 
@@ -36,7 +36,7 @@ function initSpaces() {
 		}	
 	}
 }
-function renderMaze() {
+function renderMaze(drawCurrent) {
 	ctx.clearRect(0, 0, mazeSize, mazeSize);
 	ctx.lineWidth = 2;
 	spaces[current.x][current.y][4] = true; // a little hack.
@@ -56,17 +56,20 @@ function renderMaze() {
 			ctx.stroke();
 		}
 	}
-	ctx.fillStyle = "red";
-	ctx.fillRect((current.x + 0.25) * spaceSize, (current.y + 0.25) * spaceSize, spaceSize/2, spaceSize/2);
+	if (drawCurrent) {
+		ctx.fillStyle = "red";
+		ctx.fillRect((current.x + 0.25) * spaceSize, (current.y + 0.25) * spaceSize, spaceSize/2, spaceSize/2);
+	}
 
 	ctx.beginPath(); // draw path:
 	ctx.strokeStyle = "red";
-	for (var n = 0; n + 1 < stack.length; n++) {
-		ctx.moveTo((stack[n].x * spaceSize) + (spaceSize/2), (stack[n].y * spaceSize) + (spaceSize/2));
-		ctx.lineTo((stack[n + 1].x * spaceSize) + (spaceSize/2), (stack[n + 1].y * spaceSize) + (spaceSize/2));
+	var here = {x: 0 + 1 / 2, y: 0 + 1 / 2};
+	for (var n = 0; n < stack.length; n++) {
+		ctx.moveTo(here.x * spaceSize, here.y * spaceSize);
+		here.x += directions[stack[n]].x;
+		here.y += directions[stack[n]].y;
+		ctx.lineTo(here.x * spaceSize, here.y * spaceSize);
 	}
-	ctx.moveTo((stack[stack.length - 1].x * spaceSize) + (spaceSize/2), (stack[stack.length - 1].y * spaceSize) + (spaceSize/2)); // a little hack.
-	ctx.lineTo((current.x * spaceSize) + (spaceSize/2), (current.y * spaceSize) + (spaceSize/2)); // a little hack.
 	ctx.stroke();
 }
 function stepSearch() { // Depth-first backtracker search algorithm from: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_backtracker.
@@ -82,12 +85,14 @@ function stepSearch() { // Depth-first backtracker search algorithm from: https:
 	if (neighbors.length) {
 		next = neighbors[~~(Math.random() * neighbors.length)];
 		spaces[current.x][current.y][next] = false;
-		stack.push({x: current.x, y: current.y});
+		stack.push(next);
 		current.x += directions[next].x;
 		current.y += directions[next].y;
 		spaces[current.x][current.y][(next + 2) % 4] = false;
 	} else if (stack.length) {
-		current = stack.pop();
+		current.x -= directions[stack[stack.length - 1]].x;
+		current.y -= directions[stack[stack.length - 1]].y;
+		stack.pop();
 	} else {
 		return true; // we finished!
 	}
@@ -99,7 +104,10 @@ initSpaces();
 function main() {
 	if (!stepSearch()) {
 		setTimeout(main, 250);
+		renderMaze(true); // draw current.
+	} else {
+		renderMaze(false); // don't draw current.
+		spaces = null; // release memory.
 	}
-	renderMaze();
 }
 main();

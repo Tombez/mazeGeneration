@@ -1,5 +1,5 @@
 /* User Variables */
-var mazeSize = window.innerWidth; // Dimensions of canvas in pixels.
+var mazeSize = Math.min(window.innerWidth, window.innerHeight); // Dimensions of canvas in pixels.
 var mazeSpaces = 100; // Number of spaces in the x and y directions.
 var startPosition = {x: 0, y: 0};
 var finishPosition = {x: mazeSpaces - 1, y: mazeSpaces - 1};
