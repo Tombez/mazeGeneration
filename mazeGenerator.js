@@ -1,17 +1,15 @@
 /* User Variables */
-var mazeSize = Math.min(window.innerWidth, window.innerHeight); // Dimensions of canvas in pixels.
+var mazeSize = Math.min(window.innerWidth, window.innerHeight); // Canvas dimensions might be smaller!
 var mazeSpaces = 100; // Number of spaces in the x and y directions.
 var startPosition = {x: 0, y: 0};
 var finishPosition = {x: mazeSpaces - 1, y: mazeSpaces - 1};
 /* End User Variables */
 
-var spaceSize = ~~(mazeSize / mazeSpaces);
+var spaceSize = Math.max(~~(mazeSize / mazeSpaces), 2);
 var canvas;
 var ctx;
 var spaces;
 var solutionPath;
-var letterWidth;
-var letterHeight;
 
 // Basically rainbow tables:
 var directions = [{x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}, {x: 0, y: 1}]; // right, up, left, down.
@@ -21,11 +19,10 @@ function initCanvas() {
 	canvas = document.getElementById("canvas");
 	ctx = canvas.getContext("2d");
 	
-	canvas.width = spaceSize * mazeSpaces;
-	canvas.height = spaceSize * mazeSpaces;
+	mazeSize = mazeSpaces * spaceSize + 1;
 	
-	letterWidth = ctx.measureText("S").width;
-	letterHeight = spaceSize - (2 / 15 * 2 * spaceSize);
+	canvas.width = mazeSize;
+	canvas.height = mazeSize;
 }
 function initSpaces() {
 	spaces = new Array(mazeSpaces);
@@ -78,24 +75,19 @@ function draw() {
 	ctx.fillRect(0, 0, mazeSize, mazeSize);
 	
 	ctx.beginPath(); // Draw walls.
-	ctx.lineWidth = 2;
+	ctx.lineWidth = 1;
 	ctx.strokeStyle = "black";
 	for (var y = 0; y < mazeSpaces; y++) {
 		for (var x = 0; x < mazeSpaces; x++) {
 			for (var n = 0; n < directions.length; n++) {
 				if (spaces[x][y][n]) {
-					ctx.moveTo((x + corners[n][0].x) * spaceSize, (y + corners[n][0].y) * spaceSize);
-					ctx.lineTo((x + corners[n][1].x) * spaceSize, (y + corners[n][1].y) * spaceSize);
+					ctx.moveTo((x + corners[n][0].x) * spaceSize + 0.5, (y + corners[n][0].y) * spaceSize + 0.5);
+					ctx.lineTo((x + corners[n][1].x) * spaceSize + 0.5, (y + corners[n][1].y) * spaceSize + 0.5);
 				}
 			}
 		}
 	}
 	ctx.stroke();
-	
-	ctx.fillStyle = "black"; // Draw start & finish.
-	ctx.font = spaceSize + "px Arial";
-	ctx.fillText("S", (((startPosition.x + 1) * spaceSize) - letterWidth)/2, ((startPosition.y + 1) * spaceSize) - (spaceSize - letterHeight)/2);
-	ctx.fillText("F", (((finishPosition.x + 1) * spaceSize) - letterWidth)/2, ((finishPosition + 1) * spaceSize) - (spaceSize - letterHeight)/2);
 }
 function downloadMaze() {
 	var link = document.createElement('a');
