@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+	<title>Hex Maze Generator</title>
+
+	<style>
+		body {
+			margin : 0px;
+			overflow: hidden;
+			background-color: black;	
+		}
+		#canvas {
+			/*border: 2px solid black;*/
+		}
+	</style>
+
+</head>
+
+<body>
+
+	<canvas id="canvas"></canvas>
+
+	<script type="text/javascript" src="./hexMazeGenerator.js"></script>
+	
+	<script>
+		var resize;
+		window.addEventListener("resize", resize = function() {
+			canvas.style.width = Math.min(window.innerWidth, window.innerHeight) + "px";
+			canvas.style.height = canvas.style.width;
+		});
+		resize();
+	</script>
+
+</body>
+
+</html>

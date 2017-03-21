@@ -13,7 +13,7 @@ var solutionPath;
 
 // Basically rainbow tables:
 var directions = [{x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}, {x: 0, y: 1}]; // right, up, left, down.
-var corners = [[{x: 1, y: 0}, {x: 1, y: 1}], [{x: 0, y: 0}, {x: 1, y: 0}], [{x: 0, y: 1}, {x: 0, y: 0}], [{x: 1, y: 1}, {x: 0, y: 1}]]; // [[NE, SE], [NW, NE], [SW, NW], [SE, SW]].
+var corners = [{x: 1, y: 1}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0, y: 1}]; // SE, NE, NW, SW.
 
 function initCanvas() {
 	canvas = document.getElementById("canvas");
@@ -44,13 +44,13 @@ function generate() { // Depth-first backtracker search algorithm from: https://
 	
 	var current = {x: startPosition.x, y: startPosition.y};
 	
-	while(true) {
-		spaces[current.x][current.y][4] = true;
+	do {
+		spaces[current.x][current.y][directions.length] = true;
 		neighbors = [];
-		for (n = 0; n < 4; n++) {
+		for (n = 0; n < directions.length; n++) {
 			x = current.x + directions[n].x;
 			y = current.y + directions[n].y;
-			if (spaces[x] && spaces[x][y] && !spaces[x][y][4]) {
+			if (spaces[x] && spaces[x][y] && !spaces[x][y][directions.length]) {
 				neighbors.push(n);
 			}
 		}
@@ -60,15 +60,13 @@ function generate() { // Depth-first backtracker search algorithm from: https://
 			stack.push(next);
 			current.x += directions[next].x;
 			current.y += directions[next].y;
-			spaces[current.x][current.y][(next + 2) % 4] = false;
-		} else if (stack.length) { // backtrack:
+			spaces[current.x][current.y][(next + (directions.length / 2)) % directions.length] = false;
+		} else { // backtrack:
 			current.x -= directions[stack[stack.length - 1]].x;
 			current.y -= directions[stack[stack.length - 1]].y;
 			stack.pop();
-		} else {
-			break; // we finished!
 		}
-	}
+	} while (stack.length);
 }
 function draw() {
 	ctx.fillStyle = "white"; // Draw background.
@@ -81,8 +79,9 @@ function draw() {
 		for (var x = 0; x < mazeSpaces; x++) {
 			for (var n = 0; n < directions.length; n++) {
 				if (spaces[x][y][n]) {
-					ctx.moveTo((x + corners[n][0].x) * spaceSize + 0.5, (y + corners[n][0].y) * spaceSize + 0.5);
-					ctx.lineTo((x + corners[n][1].x) * spaceSize + 0.5, (y + corners[n][1].y) * spaceSize + 0.5);
+					ctx.moveTo((x + corners[n].x) * spaceSize + 0.5, (y + corners[n].y) * spaceSize + 0.5);
+					ctx.lineTo((x + corners[(n + 1) % corners.length].x) * spaceSize + 0.5,
+						(y + corners[(n + 1) % corners.length].y) * spaceSize + 0.5);
 				}
 			}
 		}
