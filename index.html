@@ -11,12 +11,13 @@
 			margin: 0px;
 			padding: 0px;
 			background: black;
-			overflow: hidden;
+			overflow: auto;
+			text-align: center;
 		}
 		iframe {
 			border: 0px;
-			display: inline;
-			float: left;
+			display: block;
+			margin: auto;
 		}
 	</style>
 
@@ -24,19 +25,21 @@
 
 <body>
 	
-	<iframe id="iframe1" src="./mazeGenerator.html"></iframe>
-	<iframe id="iframe2" src="./mazeGeneratorDemo.html"></iframe>
-	
 	<script>
-		var iframe1 = document.getElementById("iframe1");
-		var iframe2 = document.getElementById("iframe2");
+		var windows = ["mazeGenerator", "mazeGeneratorDemo", "hexMazeGenerator"];
+		var iframes = [];
+		for (var n = 0; n < windows.length; n++) {
+			iframes[n] = document.createElement("iframe");
+			iframes[n].src = "./" + windows[n] + ".html";
+			document.body.appendChild(iframes[n]);
+		}
 		var resize;
 		
 		window.addEventListener("resize", resize = function() {
-			iframe1.width = Math.min(window.innerWidth, window.innerHeight);
-			iframe1.height = iframe1.width;
-			iframe2.width = Math.min(Math.max(window.innerWidth, window.innerHeight) - iframe1.width, window.innerWidth, window.innerHeight);
-			iframe2.height = iframe2.width;
+			for (var n = 0; n < iframes.length; n++) {
+				iframes[n].width = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+				iframes[n].height = iframes[n].width;
+			}
 		});
 		resize();
 		setTimeout(resize, 1000);
