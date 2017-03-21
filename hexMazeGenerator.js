@@ -1,6 +1,6 @@
 /* User Variables */
 var mazeSize = Math.min(window.innerWidth, window.innerHeight);
-var mazeSpaces = 70; // Number of spaces along the side.
+var mazeSpaces = 20; // Number of spaces along the side.
 var startPosition = {x: 0, y: mazeSpaces - 1};
 var finishPosition = {x: mazeSpaces - 1, y: mazeSpaces - 1};
 /* End User Variables */
@@ -17,6 +17,7 @@ var solutionPath;
 // Basically rainbow tables:
 var directions = [{x: 1, y: -1}, {x: 0, y: -1}, {x: -1, y: 0}, {x: -1, y: 1}, {x: 0, y: 1}, {x: 1, y: 0}]; // quadrant notation.
 var corners = [{x: 2, y: Math.ROOT_THREE/2}, {x: 3/2, y: 0}, {x: 1/2, y: 0}, {x: 0, y: Math.ROOT_THREE/2}, {x: 1/2, y: Math.ROOT_THREE}, {x: 3/2, y: Math.ROOT_THREE}]; // quadrant notation.
+
 function initCanvas() {
 	canvas = document.getElementById("canvas");
 	ctx = canvas.getContext("2d");
@@ -36,7 +37,6 @@ function initSpaces() {
 		}	
 	}
 }
-
 function generate() { // Depth-first backtracker search algorithm from: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_backtracker.
 	// init generation:
 	var stack = [];
@@ -78,10 +78,8 @@ function draw() {
 	ctx.fillRect(0, 0, mazeSize, mazeSize);
 	
 	ctx.beginPath(); // Draw walls.
-	ctx.lineWidth = 1;
+	ctx.lineWidth = 2;
 	ctx.strokeStyle = "black";
-	ctx.font = "20px Ubuntu";
-	ctx.fillStyle = "black";
 	var offX = spaceSize * 3 / 2;
 	var offY = spaceSize * Math.ROOT_THREE;
 	for (var x = 0; x < spaces.length; x++) {
