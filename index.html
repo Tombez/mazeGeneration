@@ -16,8 +16,8 @@
 		}
 		iframe {
 			border: 0px;
-			display: block;
-			margin: auto;
+			display: inline-block;
+			margin: 0px;
 		}
 	</style>
 
@@ -26,7 +26,7 @@
 <body>
 	
 	<script>
-		var windows = ["mazeGenerator", "mazeGeneratorDemo", "hexMazeGenerator"];
+		var windows = ["mazeGenerator", "mazeGeneratorDemo", "rainbowMazeGenerator", "hexMazeGenerator"];
 		var iframes = [];
 		for (var n = 0; n < windows.length; n++) {
 			iframes[n] = document.createElement("iframe");
@@ -37,12 +37,12 @@
 		
 		window.addEventListener("resize", resize = function() {
 			for (var n = 0; n < iframes.length; n++) {
-				iframes[n].width = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+				iframes[n].width = ~~Math.min(window.innerWidth / 2, window.innerHeight / 2);
 				iframes[n].height = iframes[n].width;
 			}
 		});
 		resize();
-		setTimeout(resize, 1000);
+		//setTimeout(resize, 1000);
 	</script>
 	
 </body>
