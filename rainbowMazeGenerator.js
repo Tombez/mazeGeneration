@@ -1,32 +1,36 @@
+"use strict";
+
 /* User Variables */
 var mazeSize = Math.min(window.innerWidth, window.innerHeight); // Canvas dimensions might be smaller!
 var mazeSpaces = 80; // Number of spaces in the x and y directions.
 var startPosition = {x: 0, y: 0};
 /* End User Variables */
 
-var spaceSize = Math.max(~~(mazeSize / mazeSpaces), 2);
+var spaceSize;
 var canvas;
 var ctx;
 var spaces;
-var satSlider;
-var lightSlider;
-var saturation = 100;
-var lightness = 50;
+var options;
 
 var directions = [{x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}, {x: 0, y: 1}]; // right, up, left, down.
 var corners = [{x: 1, y: 1}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0, y: 1}]; // SE, NE, NW, SW.
 
 function initOptions() {
-	satSlider = document.getElementById("saturation");
-	lightSlider = document.getElementById("lightness");
-
-	satSlider.addEventListener("change", function(event) {saturation = satSlider.value;});
-	lightSlider.addEventListener("change", function(event) {lightness = lightSlider.value;});
+	options = {};
+	var inputs = document.getElementsByTagName("input");
+	for (var input of inputs) {
+		options[input.id + "_" + input.type + "_listener"] = function(event) {
+			options[event.target.id] = event.target.value;
+		};
+		input.addEventListener("change", options[input.id + "_" + input.type + "_listener"]);
+		options[input.id + "_" + input.type + "_listener"]({target: input});
+	}
 }
 
 function initCanvas() {
 	canvas = document.getElementById("canvas");
 	
+	spaceSize = Math.max(~~(mazeSize / mazeSpaces), 2);
 	mazeSize = mazeSpaces * spaceSize + 1;
 	
 	canvas.width = mazeSize;
@@ -35,6 +39,8 @@ function initCanvas() {
 	ctx = canvas.getContext("2d");
 	ctx.fillStyle = "#CCC"; // Draw background.
 	ctx.fillRect(0, 0, mazeSize, mazeSize);
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = "black";
 }
 
 function initSpaces() {
@@ -84,39 +90,29 @@ function step() { // Depth-first backtracker search algorithm from: https://en.w
 }
 
 function drawProgress() {
-	ctx.fillStyle = "hsl(" + (stack.length % 361) + ", " + saturation + "%, " + lightness + "%)";
-	ctx.fillRect(current.x * spaceSize, current.y * spaceSize, spaceSize, spaceSize);
-
 	ctx.beginPath(); // Draw walls.
-	ctx.lineWidth = 1;
-	ctx.strokeStyle = "black";
-	for (var n = 0; n < directions.length; n++) {
-		if (spaces[current.x][current.y][n]) {
-			ctx.moveTo((current.x + corners[n].x) * spaceSize + 0.5, (current.y + corners[n].y) * spaceSize + 0.5);
-			ctx.lineTo((current.x + corners[(n + 1) % corners.length].x) * spaceSize + 0.5,
-				(current.y + corners[(n + 1) % corners.length].y) * spaceSize + 0.5);
+	drawTile(current.x, current.y);
+	ctx.stroke();
+}
+function drawFinal() {
+	ctx.beginPath();
+	for (var y = 0; y < mazeSpaces; y++) {
+		for (var x = 0; x < mazeSpaces; x++) {
+			drawTile(x, y);
 		}
 	}
 	ctx.stroke();
 }
-function drawFinal() {
-	ctx.beginPath(); // Draw walls.
-	ctx.lineWidth = 1;
-	ctx.strokeStyle = "black";
-	for (var y = 0; y < mazeSpaces; y++) {
-		for (var x = 0; x < mazeSpaces; x++) {
-			ctx.fillStyle = "hsl(" + (spaces[x][y].color % 361) + ", " + saturation + "%, " + lightness + "%)";
-			ctx.fillRect(x * spaceSize, y * spaceSize, spaceSize, spaceSize);
-			for (var n = 0; n < directions.length; n++) {
-				if (spaces[x][y][n]) {
-					ctx.moveTo((x + corners[n].x) * spaceSize + 0.5, (y + corners[n].y) * spaceSize + 0.5);
-					ctx.lineTo((x + corners[(n + 1) % corners.length].x) * spaceSize + 0.5,
-						(y + corners[(n + 1) % corners.length].y) * spaceSize + 0.5);
-				}
-			}
+function drawTile(x, y) {
+	ctx.fillStyle = "hsl(" + (spaces[x][y].color % 361) + ", " + options.saturation + "%, " + options.lightness + "%)";
+	ctx.fillRect(x * spaceSize, y * spaceSize, spaceSize, spaceSize);
+	for (var n = 0; n < directions.length; n++) {
+		if (spaces[x][y][n]) {
+			ctx.moveTo((x + corners[n].x) * spaceSize + 0.5, (y + corners[n].y) * spaceSize + 0.5);
+			ctx.lineTo((x + corners[(n + 1) % corners.length].x) * spaceSize + 0.5,
+				(y + corners[(n + 1) % corners.length].y) * spaceSize + 0.5);
 		}
 	}
-	ctx.stroke();
 }
 
 // Main:
