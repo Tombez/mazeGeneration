@@ -10,10 +10,18 @@
 		body {
 			margin : 0px;
 			overflow: hidden;
-			background-color: black;	
+			background-color: black;
+			color: white;
 		}
 		#canvas {
-			/*border: 2px solid black;*/
+			
+		}
+		#options {
+			display: inline-block;
+			vertical-align:top;
+		}
+		input {
+			display: block;
 		}
 	</style>
 
@@ -22,6 +30,10 @@
 <body>
 
 	<canvas id="canvas"></canvas>
+	<div id="options">
+		<input type="range" id="saturation" min="0" max="100" value="100" step="5" /><span>Saturation</span>
+		<input type="range" id="lightness" min="0" max="100" value="50" step="5" /><span>Lightness</span>
+	</div>
 
 	<script type="text/javascript" src="./rainbowMazeGenerator.js"></script>
 	

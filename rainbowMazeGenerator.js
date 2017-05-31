@@ -8,10 +8,21 @@ var spaceSize = Math.max(~~(mazeSize / mazeSpaces), 2);
 var canvas;
 var ctx;
 var spaces;
+var satSlider;
+var lightSlider;
+var saturation = 100;
+var lightness = 50;
 
-// Basically rainbow tables:
 var directions = [{x: 1, y: 0}, {x: 0, y: -1}, {x: -1, y: 0}, {x: 0, y: 1}]; // right, up, left, down.
 var corners = [{x: 1, y: 1}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0, y: 1}]; // SE, NE, NW, SW.
+
+function initOptions() {
+	satSlider = document.getElementById("saturation");
+	lightSlider = document.getElementById("lightness");
+
+	satSlider.addEventListener("change", function(event) {saturation = satSlider.value;});
+	lightSlider.addEventListener("change", function(event) {lightness = lightSlider.value;});
+}
 
 function initCanvas() {
 	canvas = document.getElementById("canvas");
@@ -62,6 +73,7 @@ function step() { // Depth-first backtracker search algorithm from: https://en.w
 			current.y += directions[next].y;
 			spaces[current.x][current.y][(next + (directions.length / 2)) % directions.length] = false;
 		} else { // backtrack:
+			spaces[current.x][current.y].color = stack.length;
 			drawProgress();
 			current.x -= directions[stack[stack.length - 1]].x;
 			current.y -= directions[stack[stack.length - 1]].y;
@@ -72,7 +84,7 @@ function step() { // Depth-first backtracker search algorithm from: https://en.w
 }
 
 function drawProgress() {
-	ctx.fillStyle = "hsl(" + (stack.length % 361) + ", 100%, 50%)";
+	ctx.fillStyle = "hsl(" + (stack.length % 361) + ", " + saturation + "%, " + lightness + "%)";
 	ctx.fillRect(current.x * spaceSize, current.y * spaceSize, spaceSize, spaceSize);
 
 	ctx.beginPath(); // Draw walls.
@@ -93,6 +105,8 @@ function drawFinal() {
 	ctx.strokeStyle = "black";
 	for (var y = 0; y < mazeSpaces; y++) {
 		for (var x = 0; x < mazeSpaces; x++) {
+			ctx.fillStyle = "hsl(" + (spaces[x][y].color % 361) + ", " + saturation + "%, " + lightness + "%)";
+			ctx.fillRect(x * spaceSize, y * spaceSize, spaceSize, spaceSize);
 			for (var n = 0; n < directions.length; n++) {
 				if (spaces[x][y][n]) {
 					ctx.moveTo((x + corners[n].x) * spaceSize + 0.5, (y + corners[n].y) * spaceSize + 0.5);
@@ -106,6 +120,7 @@ function drawFinal() {
 }
 
 // Main:
+initOptions();
 initCanvas();
 initSpaces();
 function loop() {
