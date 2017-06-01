@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+	<title>Rainbow Hex Maze Generator</title>
+
+	<style>
+		body {
+			margin : 0px;
+			overflow: hidden;
+			background-color: black;
+			display: relative;
+		}
+		#canvas {
+			position: absolute;
+			left: 50%;
+			transform: translate(-50%, 0);
+		}
+	</style>
+
+</head>
+
+<body>
+
+	<canvas id="canvas"></canvas>
+
+	<script type="text/javascript" src="./rainbowHexMazeGenerator.js"></script>
+	
+	<script>
+		var resize;
+		window.addEventListener("resize", resize = function() {
+			var scale = Math.min(window.innerWidth / canvas.width, window.innerHeight / canvas.height);
+			canvas.style.width = canvas.width * scale + "px";
+			canvas.style.height = canvas.height * scale + "px";
+		});
+		resize();
+	</script>
+
+</body>
+
+</html>
